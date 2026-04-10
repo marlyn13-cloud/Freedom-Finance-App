@@ -1,0 +1,96 @@
+/* =========================
+   ROOT VARIABLES
+========================= */
+:root {
+  --bg: #15bb9f;
+  --nav: #3ba08f;
+  --green: #0a584b;
+  --green-dark: #08463b;
+  --green-soft: #9efdc6;
+  --card: #fff;
+  --border: #414347;
+  --muted: #000000;
+  --shadow: 0 10px 24px rgba(0,0,0,.06);
+  --radius: 15px;
+  --ink: #111;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --purple: #8b5cf6;
+  --pink: #e58f9d;
+  --good: #10b981;
+}
+
+/* =========================
+   GLOBAL
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================
+   AUTH PAGE
+========================= */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  background: linear-gradient(135deg, var(--nav) 0%, var(--green) 100%);
+}
+
+.auth-preview {
+  padding: 36px;
+  background: var(--bg);
+  border-right: 1px solid var(--green);
+}
+
+.auth-preview-inner {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.auth-brand {
+  color: var(--green);
+  font-weight: bold;
+  font-size: 28px;
+  margin-bottom: 18px;
+}
+
+.auth-heading {
+  margin: 0;
+  font-size: 46px;
+  line-height: 1.06;
+  max-width: 640px;
+}
+
+.auth-subheading {
+  margin: 14px 0 28px;
+  color: var(--muted);
+  font-size: 17px;
+  max-width: 700px;
+}
+
+.main-brand-logo {
+  height: 90px; 
+  margin-bottom: 20px;
+  mix-blend-mode: multiply; /* removes the white background! */
+  object-fit: contain;
+}
+
+.card-brand-logo {
+  height: 140px; 
+  margin: 0 auto 15px auto; /* Centers the logo */
+  display: block;
+  mix-blend-mode: multiply; 
+  object-fit: contain;
+}

@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Freedom Finance - Budget</title>
+  <title>Freedom Finance - Reports</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://unpkg.com/rivescript@latest/dist/rivescript.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/currency.js/2.0.4/currency.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -23,7 +25,7 @@
 
       <div class="sidebar-balance-card">
         <div class="s-balance-label">TOTAL BALANCE</div>
-        <div class="s-balance-amount" id="side-balance">$3,897.11</div>
+        <div class="s-balance-amount" id="side-balance">$0.00</div>
         <div class="s-balance-sub" id="side-savings-pct">0% of income saved</div>
       </div>
 
@@ -39,20 +41,20 @@
         <button class="nav-item" onclick="window.location.href='transaction.html'">
           <span class="nav-icon">💵</span> Transactions
         </button>
-        <button class="nav-item active">
+        <button class="nav-item" onclick="window.location.href='budget.html'">
           <span class="nav-icon">💰</span> Budget
-          <span class="status-dot"></span>
         </button>
         <div class="nav-section">
         <button class="nav-item" onclick="window.location.href='reports.html'">
           <span class="nav-icon">📝</span> Reports
+          <span class="status-dot"></span>
         </button>
       </div>
       </div>
 
       <div class="sidebar-footer">
         <div class="user-profile">
-          <div class="user-avatar">~</div>
+          <div class="user-avatar">DE</div>
           <div class="user-info">
             <div class="user-name">demo</div>
             <div class="user-type">Personal account</div>
@@ -66,42 +68,73 @@
       
       <header class="page-header" style="align-items: center;">
         <div>
-          <h1 class="greeting">Budget</h1>
-          <p class="current-date">Monthly spending limits</p>
+          <h1 class="greeting">Financial Reports</h1>
+          <p class="current-date">Insights, summaries, and data exports</p>
         </div>
-        
-        <div style="position: relative; display: inline-block;">
-          <div class="message-bubble">💡 Add or Edit Budgets here!</div>
-          <button class="btn-primary" onclick="openBudgetModalAdd()">+ New Budget</button>
-        </div>
-        
+        <button class="btn-primary" onclick="exportToPDF()" style="background: var(--color-text-heading);">📥 Export to PDF</button>
       </header>
 
-      <section class="budget-list">
+      <section class="content-grid">
+        <div class="panel-card" style="grid-column: span 2;">
+          <h2 class="panel-title">Expense Breakdown</h2>
+          <p class="panel-sub">Visualizing where your money goes</p>
+          <div id="reportsChartWrap" class="chart-wrapper">
+             </div>
+        </div>
+
+        <div class="panel-card" style="grid-column: span 2;">
+          <h2 class="panel-title">Category Totals</h2>
+          <p class="panel-sub">Lifetime spending by category</p>
+          <div id="categoryTotalsList" class="category-list">
+            </div>
+        </div>
       </section>
+
     </main>
-    <div class="modal hidden" id="budgetModal" onclick="backdropClose(event,'budgetModal')">
+  </div> 
+
+  <div class="modal hidden" id="txModal" onclick="backdropClose(event,'txModal')">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-top">
-        <h3 id="budgetModalTitle">New Budget</h3>
-        <button class="close-x" onclick="closeModal('budgetModal')" aria-label="Close">✕</button>
+        <h3 id="txModalTitle">Add Transaction</h3>
+        <button class="close-x" onclick="closeModal('txModal')" aria-label="Close">✕</button>
       </div>
-      
-      <label for="budCategory">Category</label>
-      <input id="budCategory" placeholder="e.g., Food" />
-      
-      <label for="budLimit">Monthly Limit (USD)</label>
-      <input id="budLimit" type="number" step="0.01" />
-      
-      <div class="error" id="budError"></div>
-      
+      <div class="grid2">
+        <div>
+          <label for="txType">Type</label>
+          <select id="txType">
+            <option value="income">Income (Paycheck)</option>
+            <option value="expense" selected>Expense</option>
+            <option value="savings">Savings</option>
+            <option value="investment">Investment</option>
+          </select>
+        </div>
+        <div>
+          <label for="txDate">Date</label>
+          <input id="txDate" type="date" />
+        </div>
+      </div>
+      <label for="txDesc">Description</label>
+      <input id="txDesc" placeholder="e.g., Groceries" />
+      <div class="grid2">
+        <div>
+          <label for="txAmount">Amount (positive)</label>
+          <input id="txAmount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="txCategory">Category</label>
+          <select id="txCategory" onchange="onTxCategoryChange()"></select>
+          <input id="txNewCategory" class="hidden" aria-label="New category name" placeholder="New category name..." />
+        </div>
+      </div>
+      <div class="error" id="txError"></div>
       <div class="actions">
-        <button class="btn secondary" onclick="closeModal('budgetModal')">Cancel</button>
-        <button class="btn primary" id="budSaveBtn" onclick="saveBudget()">Save</button>
+        <button class="btn secondary" onclick="closeModal('txModal')">Cancel</button>
+        <button class="btn primary" id="txSaveBtn" onclick="saveTransaction()">Save</button>
       </div>
     </div>
   </div>
-  <!-- Spark AI -->
+
   <button id="spark-fab" onclick="toggleChat()">✨</button>
   <div id="spark-chat-window" class="hidden">
     <div class="chat-header">
@@ -116,7 +149,7 @@
       <button id="spark-send-btn" onclick="handleSparkSend()" disabled>Send</button>
     </div>
   </div>
-  </div> 
+
   <script src="script.js"></script>
 </body>
 </html>

@@ -557,6 +557,123 @@ function renderAll() {
       budContainer.appendChild(card);
     });
   }
+  // --- Render Reports Page ---
+  const reportsChartWrap = document.getElementById("reportsChartWrap");
+  if (reportsChartWrap) {
+    const map = expenseByCategory(txs);
+    const rows = Array.from(map.entries()).sort((a, b) => b[1] - a[1]); // Sort highest to lowest
+    
+    if (rows.length === 0) {
+      reportsChartWrap.innerHTML = `<div class="chart-empty">No expenses logged yet. Add some transactions to generate reports!</div>`;
+    } else {
+      const colors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#64748b"];
+      const total = rows.reduce((s, r) => s + r[1], 0);
+      let stops = [], cur = 0, legendHtml = "";
+      
+      for (let i = 0; i < rows.length; i++) {
+        const [cat, val] = rows[i];
+        const pct = (val / total) * 100;
+        const color = colors[i % colors.length];
+        
+        stops.push(`${color} ${cur}% ${cur + pct}%`);
+        cur += pct;
+        
+        legendHtml += `
+          <div class="legend-item">
+            <div class="legend-left">
+              <div class="legend-color" style="background:${color}"></div>
+              <div class="legend-label">${escapeHtml(cat)}</div>
+            </div>
+            <div class="legend-val">${money(val)}</div>
+          </div>`;
+      }
+      
+      reportsChartWrap.innerHTML = `
+        <div class="pie-container">
+          <div class="pie-chart" style="background:conic-gradient(${stops.join(",")})"></div>
+          <div class="pie-legend">${legendHtml}</div>
+        </div>`;
+        
+      // Populate the List below the chart
+      const catListEl = document.getElementById("categoryTotalsList");
+      if(catListEl) {
+        catListEl.innerHTML = "";
+        rows.forEach((item, index) => {
+          const [cat, amt] = item;
+          const pct = Math.round((amt / total) * 100);
+          const colorClass = ["red", "blue", "orange", "green", "blue", "red", "orange"][index % 7];
+          
+          catListEl.innerHTML += `
+            <div class="category-item">
+              <div class="cat-details">
+                <div class="cat-header">
+                  <span class="cat-name">${escapeHtml(cat)}</span>
+                  <span class="cat-amount">${money(amt)}</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill fill-${colorClass}" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            </div>`;
+        });
+      }
+    }
+  }
+/* =========================================
+   10. EXPORT DATA
+========================================= */
+window.exportToPDF = function() {
+  const txs = loadTx();
+  if (txs.length === 0) {
+    alert("You have no transactions to export!");
+    return;
+  }
+
+  // 1. Initialize the PDF document
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // 2. Add a Title to the document
+  doc.setFontSize(18);
+  doc.text("Freedom Finance - Expense Report", 14, 20);
+  
+  doc.setFontSize(11);
+  doc.setTextColor(100);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+  // 3. Format the data for the table
+  const tableColumns = ["Date", "Description", "Category", "Type", "Amount"];
+  const tableRows = [];
+
+  // Loop through your transactions and push them into the rows array
+  txs.forEach(t => {
+    // Add a + or - sign to the amount for better readability
+    const sign = t.type === "expense" ? "-" : "+";
+    const formattedAmount = `${sign}${money(t.amount)}`;
+    
+    // Create an array for this specific row
+    const rowData = [
+      t.date,
+      t.desc,
+      t.category,
+      t.type.toUpperCase(),
+      formattedAmount
+    ];
+    tableRows.push(rowData);
+  });
+
+  // 4. Draw the Table using the autotable plugin
+  doc.autoTable({
+    head: [tableColumns],
+    body: tableRows,
+    startY: 35, // Start drawing the table below the title
+    theme: 'striped', // Gives it a nice alternating gray/white background
+    headStyles: { fillColor: [59, 130, 246] }, // Uses your Freedom Finance blue!
+  });
+
+  // 5. Trigger the Download
+  doc.save(`FreedomFinance_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+};
 } // <--- This is the ONLY closing bracket for the renderAll function!
 /* =========================================
    8. AI CHATBOT — SPARK (LOCAL MODEL + Transformers.js, rivescript.js for routing, langchain.js for prompt management,
@@ -840,15 +957,29 @@ function scrollToBottom() {
    9. INITIALIZATION
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  const sparkInput = document.getElementById("spark-input");
-  if (sparkInput) {
-    sparkInput.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") window.handleSparkSend();
-    });
+  // --- NEW: Automatically set today's date ---
+  const dateEl = document.getElementById("current-date-display");
+  if (dateEl) {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateEl.textContent = `Today is ${today.toLocaleDateString('en-US', options)}`;
   }
 
+  // Ensure user is logged in
+  requireAuth();
+  
+  // Load data and render the screen
   loadBudgets();
   loadCategories();
   renderAll();
+  
+  // Initialize AI
   initRiveScript();
+
+  const sparkInput = document.getElementById("spark-input");
+  if (sparkInput) {
+    sparkInput.addEventListener("keypress", (e) => { 
+      if (e.key === "Enter") window.handleSparkSend(); 
+    });
+  }
 });

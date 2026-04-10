@@ -47,7 +47,7 @@
 
       <div class="sidebar-footer">
         <div class="user-profile">
-          <div class="user-avatar">DE</div>
+          <div class="user-avatar">~</div>
           <div class="user-info">
             <div class="user-name">demo</div>
             <div class="user-type">Personal account</div>
@@ -64,86 +64,15 @@
           <h1 class="greeting">Budget</h1>
           <p class="current-date">Monthly spending limits</p>
         </div>
-        <button class="btn-primary" onclick="openBudgetModalAdd()">+ New Budget</button>
+        
+        <div style="position: relative; display: inline-block;">
+          <div class="message-bubble">💡 Add or Edit Budgets here!</div>
+          <button class="btn-primary" onclick="openBudgetModalAdd()">+ New Budget</button>
+        </div>
+        
       </header>
 
       <section class="budget-list">
-        
-        <div class="budget-card">
-          <div class="bc-header">
-            <div class="bc-title-group">
-              <span>🍔</span>
-              <span>Food</span>
-            </div>
-            <div class="bc-actions">
-              <span class="tx-badge badge-red">Over budget</span>
-              <button class="btn-close">✕</button>
-            </div>
-          </div>
-          <div class="bc-sub">Monthly budget</div>
-          <div class="bc-amounts">
-            <span class="bc-spent text-red">$542.50</span>
-            <span class="bc-limit">of $400.00</span>
-          </div>
-          <div class="bc-progress">
-            <div class="bar-fill2" style="width: 100%"></div>
-          </div>
-          <div class="bc-footer">
-            <span>$142.50 over</span>
-            <span>100%</span>
-          </div>
-        </div>
-
-        <div class="budget-card">
-          <div class="bc-header">
-            <div class="bc-title-group">
-              <span>🍜</span>
-              <span>Dining Out</span>
-            </div>
-            <div class="bc-actions">
-              <span class="tx-badge badge-green">On track</span>
-              <button class="btn-close">✕</button>
-            </div>
-          </div>
-          <div class="bc-sub">Monthly budget</div>
-          <div class="bc-amounts">
-            <span class="bc-spent text-dark">$89.00</span>
-            <span class="bc-limit">of $150.00</span>
-          </div>
-          <div class="bc-progress">
-            <div class= "bar-fill2" style="width: 59%"></div>
-          </div>
-          <div class="bc-footer">
-            <span>$61.00 remaining</span>
-            <span>59%</span>
-          </div>
-        </div>
-
-        <div class="budget-card">
-          <div class="bc-header">
-            <div class="bc-title-group">
-              <span>⛽</span>
-              <span>Fuel</span>
-            </div>
-            <div class="bc-actions">
-              <span class="tx-badge badge-warning">Nearing limit</span>
-              <button class="btn-close">✕</button>
-            </div>
-          </div>
-          <div class="bc-sub">Monthly budget</div>
-          <div class="bc-amounts">
-            <span class="bc-spent text-orange">$118.40</span>
-            <span class="bc-limit">of $120.00</span>
-          </div>
-          <div class="bc-progress">
-            <div class="bar-fill2" style="width: 98%"></div>
-          </div>
-          <div class="bc-footer">
-            <span>$1.60 remaining</span>
-            <span>98%</span>
-          </div>
-        </div>
-
       </section>
     </main>
     <div class="modal hidden" id="budgetModal" onclick="backdropClose(event,'budgetModal')">

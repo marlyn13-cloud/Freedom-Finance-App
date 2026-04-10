@@ -661,6 +661,44 @@ body {
   align-items: center;
   margin-bottom: 4px;
 }
+/* =========================
+   9. MESSAGE BUBBLES
+========================= */
+.message-bubble {
+  position: absolute;
+  bottom: 130%; /* Pushes it right above the button */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-text-heading);
+  color: var(--color-text-inverse);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  pointer-events: none; /* Ensures the bubble doesn't block mouse clicks */
+  animation: floatBubble 2.5s ease-in-out infinite;
+  z-index: 10;
+}
+
+/* The little triangle pointing down */
+.message-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--color-text-heading) transparent transparent transparent;
+}
+
+/* Subtle bouncing animation */
+@keyframes floatBubble {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -6px); }
+}
 
 .bc-title-group {
   display: flex;

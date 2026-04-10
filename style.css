@@ -3,9 +3,10 @@
   --color-primary: #3b82f6;         
   --color-primary-hover: #2563eb;   
   --color-primary-light: #eff6ff;   
+  --color-border: #7a7a7a;
 
   /* --- Backgrounds --- */
-  --color-bg-app: #f8fafc;          
+  --color-bg-app: #ebebeb;          
   --color-bg-surface: #ffffff;      
 
   /* --- Text --- */
@@ -18,7 +19,6 @@
   --color-badge-danger-bg: #f7b0b0;   
   --color-badge-warning-bg: #f3cb85;   
   --color-bar-fill2: #3b82f6; 
-  /* --- Status Colors --- */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
  
@@ -641,10 +641,20 @@ body {
    6. BUDGET PAGE
 ========================= */
 .budget-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Creates 2 equal columns */
   gap: 24px;
-  max-width: 460px; /* Constrains the width to look like the design */
+  max-width: 1000px; /* Widened so two cards fit perfectly side-by-side */
+  width: 100%;
+  align-items: start; /* Prevents cards from stretching vertically if one has more text */
+}
+
+/* automatically drop down to 1 column on smaller screens */
+@media (max-width: 900px) {
+  .budget-list {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
 }
 
 .budget-card {

@@ -5,41 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Freedom Finance</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </head>
-    <body>
-        <div class="auth-preview">
-      <div class="auth-preview-inner">
-        <div class="auth-brand">Freedom Finance</div>
-        <h1 class="auth-heading">Take control of your money with confidence.</h1>
-        <p class="auth-subheading">
-          Track transactions, manage budgets, and visualize your spending in one place.
-        </p>
+<body>
+  <div class="auth-panel">
+    <div class="auth-card">
+      
+      <div class="brand-header">
+        <img src="LogInLogo.png" alt="Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="text-dark">Freedom</span><span class="text-blue">Finance</span>
+        </div>
       </div>
-    </div>
-    
-    </body>
-</html>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Freedom Finance</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js"></script>
-</head>
-    <body>
-        <div class="auth-preview">
-      <div class="auth-preview-inner">
-        <div class="auth-brand">Freedom Finance</div>
-        <h1 class="auth-heading">Take control of your money with confidence.</h1>
-        <p class="auth-subheading">
-          Track transactions, manage budgets, and visualize your spending in one place.
-        </p>
+      <div id="view-login" class="auth-view active">
+        <h2 class="auth-heading">Take control of your money with confidence.</h2>
+        <h2 class="auth-card-title">Welcome back</h2>
+        <p class="auth-card-subtitle">Sign in to continue managing your money</p>
+
+        <div class="form-group">
+          <label for="loginIdentifier">Username or Email</label>
+          <input id="loginIdentifier" type="text" placeholder="Username or Email" />
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="•••••••" />
+        </div>
+
+        <div class="error" id="loginError"></div>
+
+        <button class="auth-btn" type="button" onclick="handleLogin()">Sign In &rarr;</button>
+
+        <div class="switch-text">
+          New here?
+          <button class="text-link inline" type="button" onclick="showAuthView('signup')">Create a free account</button>
+        </div>
       </div>
-    </div>
-    
-    </body>
+
+      <div id="view-signup" class="auth-view">
+        <h2 class="auth-card-title">Create Account</h2>
+        <p class="auth-card-subtitle">Set up your Freedom Finance account</p>
+
+        <div class="form-group">
+          <label for="signupUsername">Username</label>
+          <input id="signupUsername" type="text" placeholder="Choose a username" />
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input id="signupEmail" type="email" placeholder="Enter your email" />
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input id="signupPassword" type="password" placeholder="Create a password" />
+        </div>
+
+        <div class="form-group">
+          <label for="signupConfirmPassword">Confirm Password</label>
+          <input id="signupConfirmPassword" type="password" placeholder="Confirm your password" />
+        </div>
+
+        <div class="error" id="signupError"></div>
+
+        <button class="auth-btn" type="button" onclick="handleSignup()">Create Account</button>
+
+        <div class="switch-text">
+          Already have an account?
+          <button class="text-link inline" type="button" onclick="showAuthView('login')">Sign in</button>
+            </div>
+         </div>
+      </div> 
+    </div> 
+</body>
 </html>

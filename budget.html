@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Freedom Finance - Budget</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/rivescript@latest/dist/rivescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/currency.js/2.0.4/currency.min.js"></script>
+</head>
+<body>
+
+  <div class="dashboard-layout">
+    
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="LogInLogo.png" alt="Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="text-dark">Freedom</span><span class="text-blue">Finance</span>
+        </div>
+      </div>
+
+      <div class="sidebar-balance-card">
+        <div class="s-balance-label">TOTAL BALANCE</div>
+        <div class="s-balance-amount" id="side-balance">$3,897.11</div>
+        <div class="s-balance-sub" id="side-savings-pct">0% of income saved</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">OVERVIEW</div>
+        <button class="nav-item" onclick="window.location.href='dashboard.html'">
+          <span class="nav-icon">⊞</span> Dashboard
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">MANAGE</div>
+        <button class="nav-item" onclick="window.location.href='transaction.html'">
+          <span class="nav-icon">≡</span> Transactions
+        </button>
+        <button class="nav-item active">
+          <span class="nav-icon">◷</span> Budget
+          <span class="status-dot"></span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">DE</div>
+          <div class="user-info">
+            <div class="user-name">demo</div>
+            <div class="user-type">Personal account</div>
+          </div>
+        </div>
+        <button class="sign-out-btn" onclick="window.logoutUser()">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      
+      <header class="page-header" style="align-items: center;">
+        <div>
+          <h1 class="greeting">Budget</h1>
+          <p class="current-date">Monthly spending limits</p>
+        </div>
+        <button class="btn-primary" onclick="openBudgetModalAdd()">+ New Budget</button>
+      </header>
+
+      <section class="budget-list">
+        
+        <div class="budget-card">
+          <div class="bc-header">
+            <div class="bc-title-group">
+              <span>🍔</span>
+              <span>Food</span>
+            </div>
+            <div class="bc-actions">
+              <span class="tx-badge badge-red">Over budget</span>
+              <button class="btn-close">✕</button>
+            </div>
+          </div>
+          <div class="bc-sub">Monthly budget</div>
+          <div class="bc-amounts">
+            <span class="bc-spent text-red">$542.50</span>
+            <span class="bc-limit">of $400.00</span>
+          </div>
+          <div class="bc-progress">
+            <div class="bar-fill2" style="width: 100%"></div>
+          </div>
+          <div class="bc-footer">
+            <span>$142.50 over</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="bc-header">
+            <div class="bc-title-group">
+              <span>🍜</span>
+              <span>Dining Out</span>
+            </div>
+            <div class="bc-actions">
+              <span class="tx-badge badge-green">On track</span>
+              <button class="btn-close">✕</button>
+            </div>
+          </div>
+          <div class="bc-sub">Monthly budget</div>
+          <div class="bc-amounts">
+            <span class="bc-spent text-dark">$89.00</span>
+            <span class="bc-limit">of $150.00</span>
+          </div>
+          <div class="bc-progress">
+            <div class= "bar-fill2" style="width: 59%"></div>
+          </div>
+          <div class="bc-footer">
+            <span>$61.00 remaining</span>
+            <span>59%</span>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="bc-header">
+            <div class="bc-title-group">
+              <span>⛽</span>
+              <span>Fuel</span>
+            </div>
+            <div class="bc-actions">
+              <span class="tx-badge badge-warning">Nearing limit</span>
+              <button class="btn-close">✕</button>
+            </div>
+          </div>
+          <div class="bc-sub">Monthly budget</div>
+          <div class="bc-amounts">
+            <span class="bc-spent text-orange">$118.40</span>
+            <span class="bc-limit">of $120.00</span>
+          </div>
+          <div class="bc-progress">
+            <div class="bar-fill2" style="width: 98%"></div>
+          </div>
+          <div class="bc-footer">
+            <span>$1.60 remaining</span>
+            <span>98%</span>
+          </div>
+        </div>
+
+      </section>
+    </main>
+    <div class="modal hidden" id="budgetModal" onclick="backdropClose(event,'budgetModal')">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <div class="modal-top">
+        <h3 id="budgetModalTitle">New Budget</h3>
+        <button class="close-x" onclick="closeModal('budgetModal')" aria-label="Close">✕</button>
+      </div>
+      
+      <label for="budCategory">Category</label>
+      <input id="budCategory" placeholder="e.g., Food" />
+      
+      <label for="budLimit">Monthly Limit (USD)</label>
+      <input id="budLimit" type="number" step="0.01" />
+      
+      <div class="error" id="budError"></div>
+      
+      <div class="actions">
+        <button class="btn secondary" onclick="closeModal('budgetModal')">Cancel</button>
+        <button class="btn primary" id="budSaveBtn" onclick="saveBudget()">Save</button>
+      </div>
+    </div>
+  </div>
+  <!-- Spark AI -->
+  <button id="spark-fab" onclick="toggleChat()">✨</button>
+  <div id="spark-chat-window" class="hidden">
+    <div class="chat-header">
+      <span>✨ Spark AI</span>
+      <button class="close-chat" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-body" id="spark-chat-body">
+      <div class="chat-msg bot">Hi! I'm Spark ✨ — Type to get started!</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="spark-input" placeholder="Type a message..." disabled />
+      <button id="spark-send-btn" onclick="handleSparkSend()" disabled>Send</button>
+    </div>
+  </div>
+  </div> 
+  <script src="script.js"></script>
+</body>
+</html>

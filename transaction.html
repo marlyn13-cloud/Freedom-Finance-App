@@ -74,22 +74,20 @@
 
       <div class="table-toolbar">
         <div class="search-box">
-            <form class="table-toolbar" onsubmit="event.preventDefault(); return false;">
-</form>
           <span style="margin-right: 8px; opacity: 0.5;">🔍</span>
-          <input type="text" id="searchTx" placeholder="Search transactions..." oninput="renderAll()" />
+          <input type="text" id="searchTx" placeholder="Search transactions..." />
         </div>
         <div class="filter-group">
-          <select id="filterType" class="filter-select" onchange="renderAll()">
+          <select id="filterType" class="filter-select">
             <option value="all">All types</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
             <option value="savings">Savings</option>
             <option value="investment">Investment</option>
           </select>
-          <select id="filterCategory" class="filter-select" onchange="renderAll()">
+          <select id="filterCategory" class="filter-select">
             <option value="all">All categories</option>
-            </select>
+          </select>
         </div>
       </div>
 

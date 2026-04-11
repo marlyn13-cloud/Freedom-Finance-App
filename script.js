@@ -312,6 +312,13 @@ window.saveTransaction = function () {
 
   saveTx(txs);
   closeModal("txModal");
+  populateFilterCategories(); // Add this here!
+  renderAll();
+};
+
+window.deleteTransaction = function (id) {
+  saveTx(loadTx().filter(t => t.id !== id));
+  populateFilterCategories(); // Add this here!
   renderAll();
 };
 
@@ -339,6 +346,7 @@ function populateFilterCategories() {
 
 window.deleteTransaction = function (id) {
   saveTx(loadTx().filter(t => t.id !== id));
+  populateFilterCategories(); // Add this here!
   renderAll();
 };
 
@@ -420,7 +428,12 @@ window.deleteBudget = function (id) {
 /* =========================================
    7. RENDERING
    ========================================= */
+let isRendering = false; // Add this variable at the very top of your script.js
+
 function renderAll() {
+  if (isRendering) return; // If we are already drawing, stop!
+  isRendering = true;
+
   const txs = loadTx();
   const buds = loadBudgets();
   const { income, expenses, savings, balance } = computeTotals(txs);
@@ -437,7 +450,8 @@ function renderAll() {
   if (sidePctEl) {
     const unspentPct = income > 0 ? Math.round((balance / income) * 100) : 0;
     sidePctEl.textContent = `${unspentPct}% of income saved`;
-  }
+  isRendering = false;
+}
 
   const cardPctEl = document.getElementById("sum-savings-pct");
   if (cardPctEl) {
@@ -502,10 +516,8 @@ function renderAll() {
       txCountEl.textContent = `${filteredTxs.length} transaction${filteredTxs.length !== 1 ? 's' : ''}`;
     }
 
-    // 4. Make sure the Category dropdown is up to date with any newly added categories
-    populateFilterCategories();
 
-    // 5. Draw the filtered list to the screen
+    // 4. Draw the filtered list to the screen
     allWrap.innerHTML = "";
     if (filteredTxs.length === 0) {
        allWrap.innerHTML = "<div class='text-muted' style='padding: 32px; text-align: center;'>No transactions found.</div>";

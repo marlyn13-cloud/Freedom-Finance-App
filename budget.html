@@ -105,9 +105,15 @@
   <button id="spark-fab" onclick="toggleChat()">✨</button>
   <div id="spark-chat-window" class="hidden">
     <div class="chat-header">
-      <span>✨ Spark AI</span>
-      <button class="close-chat" onclick="toggleChat()">✕</button>
+  <div class="chat-header-info">
+    <div class="chat-header-avatar">✦</div>
+    <div class="chat-header-text">
+      <span class="chat-header-name">Spark AI</span>
+      <span class="chat-header-status">Online now</span>
     </div>
+  </div>
+  <button type="button" class="close-chat" onclick="toggleChat()">✕</button>
+</div>
     <div class="chat-body" id="spark-chat-body">
       <div class="chat-msg bot">Hi! I'm Spark ✨ — Type to get started!</div>
     </div>

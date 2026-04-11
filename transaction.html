@@ -74,6 +74,8 @@
 
       <div class="table-toolbar">
         <div class="search-box">
+            <form class="table-toolbar" onsubmit="event.preventDefault(); return false;">
+</form>
           <span style="margin-right: 8px; opacity: 0.5;">🔍</span>
           <input type="text" id="searchTx" placeholder="Search transactions..." oninput="renderAll()" />
         </div>
@@ -142,9 +144,15 @@
   <button id="spark-fab" onclick="toggleChat()">✨</button>
   <div id="spark-chat-window" class="hidden">
     <div class="chat-header">
-      <span>✨ Spark AI</span>
-      <button class="close-chat" onclick="toggleChat()">✕</button>
+  <div class="chat-header-info">
+    <div class="chat-header-avatar">✦</div>
+    <div class="chat-header-text">
+      <span class="chat-header-name">Spark AI</span>
+      <span class="chat-header-status">Online now</span>
     </div>
+  </div>
+  <button type="button" class="close-chat" onclick="toggleChat()">✕</button>
+</div>
     <div class="chat-body" id="spark-chat-body">
       <div class="chat-msg bot">Hi! I'm Spark ✨ — Type to get started!</div>
     </div>
@@ -153,7 +161,7 @@
       <button id="spark-send-btn" onclick="handleSparkSend()" disabled>Send</button>
     </div>
   </div>
-
+</div>
   <script src="script.js"></script>
 </body>
 </html>

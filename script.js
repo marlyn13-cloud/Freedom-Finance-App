@@ -1,5 +1,3 @@
-localStorage.clear(); // NUKE ALL DATA
-
 // ===== 1. STORAGE KEYS & STATE =====
 const TX_KEY  = "ff_transactions_v1";
 const BUD_KEY = "ff_budgets_v1";

@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const dateEl = document.getElementById("current-date-display");
   if (dateEl) dateEl.textContent = `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
-  requireAuth(); loadBudgets(); loadCategories(); populateFilterCategories(); renderAll(); initRiveScript();
+  loadBudgets(); loadCategories(); populateFilterCategories(); renderAll(); initRiveScript();
 
   // SAFE EVENT LISTENERS (Guaranteed not to loop)
   const searchInput = document.getElementById("searchTx");

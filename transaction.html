@@ -64,136 +64,40 @@
     </aside>
 
     <main class="main-content">
-      
-      <header class="page-header" style="align-items: flex-start;">
+      <header class="page-header" style="align-items: center;">
         <div>
           <h1 class="greeting">Transactions</h1>
-          <p class="current-date">12 transactions</p>
+          <p class="current-date" id="txCount">0 transactions</p>
         </div>
         <button class="btn-primary" onclick="openTxModalAdd()">+ Add Transaction</button>
       </header>
 
       <div class="table-toolbar">
         <div class="search-box">
-          <span style="color: var(--color-text-muted); margin-right: 8px;">🔍</span>
-          <input type="text" placeholder="Search transactions..." id="searchInput" />
+          <span style="margin-right: 8px; opacity: 0.5;">🔍</span>
+          <input type="text" id="searchTx" placeholder="Search transactions..." oninput="renderAll()" />
         </div>
         <div class="filter-group">
-          <select class="filter-select" aria-label="Filter by type">
+          <select id="filterType" class="filter-select" onchange="renderAll()">
             <option value="all">All types</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
+            <option value="savings">Savings</option>
+            <option value="investment">Investment</option>
           </select>
-          <select class="filter-select" aria-label="Filter by category">
+          <select id="filterCategory" class="filter-select" onchange="renderAll()">
             <option value="all">All categories</option>
-            <option value="food">Food</option>
-            <option value="fuel">Fuel</option>
-            <option value="shopping">Shopping</option>
-          </select>
+            </select>
         </div>
       </div>
 
-      <div class="panel-card transaction-panel">
-        
-        <div class="tx-table-header">
-          <div class="col-desc">DESCRIPTION</div>
-          <div class="col-cat">CATEGORY</div>
-          <div class="col-date">DATE</div>
-          <div class="col-amt">AMOUNT</div>
-          <div class="col-actions"></div>
-        </div>
-
-        <div class="tx-list" id="allList">
-          
-          <div class="tx-row">
-            <div class="col-desc">
-              <div class="tx-icon bg-light-red">🍔</div>
-              <div class="tx-info">
-                <div class="tx-title">food</div>
-                <div class="tx-note">No notes</div>
-              </div>
-            </div>
-            <div class="col-cat"><span class="badge-pill">Food</span></div>
-            <div class="col-date">2026-04-10</div>
-            <div class="col-amt text-red">-$400.00</div>
-            <div class="col-actions">
-              <button class="icon-btn-small" title="Edit">📝</button>
-              <button class="icon-btn-small" title="Delete">X</button>
-            </div>
+      <section class="transaction-panel panel-card" style="padding: 0;">
+        <div id="allList">
           </div>
-
-          <div class="tx-row">
-            <div class="col-desc">
-              <div class="tx-icon bg-light-red">⛽</div>
-              <div class="tx-info">
-                <div class="tx-title">gas</div>
-                <div class="tx-note">No notes</div>
-              </div>
-            </div>
-            <div class="col-cat"><span class="badge-pill">Fuel</span></div>
-            <div class="col-date">2026-04-10</div>
-            <div class="col-amt text-red">-$50.00</div>
-            <div class="col-actions">
-              <button class="icon-btn-small" title="Edit">📝</button>
-              <button class="icon-btn-small" title="Delete">X</button>
-            </div>
-          </div>
-
-          <div class="tx-row">
-            <div class="col-desc">
-              <div class="tx-icon bg-light-green">💰</div>
-              <div class="tx-info">
-                <div class="tx-title">Stock Dividend</div>
-                <div class="tx-note">No notes</div>
-              </div>
-            </div>
-            <div class="col-cat"><span class="badge-pill">Dividend</span></div>
-            <div class="col-date">2026-04-07</div>
-            <div class="col-amt text-green">+$220.00</div>
-            <div class="col-actions">
-              <button class="icon-btn-small" title="Edit">📝</button>
-              <button class="icon-btn-small" title="Delete">X</button>
-            </div>
-          </div>
-
-          <div class="tx-row">
-            <div class="col-desc">
-              <div class="tx-icon bg-light-blue">🛍️</div>
-              <div class="tx-info">
-                <div class="tx-title">Amazon Purchase</div>
-                <div class="tx-note">No notes</div>
-              </div>
-            </div>
-            <div class="col-cat"><span class="badge-pill">Shopping</span></div>
-            <div class="col-date">2026-04-07</div>
-            <div class="col-amt text-red">-$143.00</div>
-            <div class="col-actions">
-              <button class="icon-btn-small" title="Edit">📝</button>
-              <button class="icon-btn-small" title="Delete">X</button>
-            </div>
-          </div>
-
-          <div class="tx-row">
-            <div class="col-desc">
-              <div class="tx-icon bg-light-red">🍜</div>
-              <div class="tx-info">
-                <div class="tx-title">Restaurant Dinner</div>
-                <div class="tx-note">Date night</div>
-              </div>
-            </div>
-            <div class="col-cat"><span class="badge-pill">Dining Out</span></div>
-            <div class="col-date">2026-04-06</div>
-            <div class="col-amt text-red">-$89.00</div>
-            <div class="col-actions">
-              <button class="icon-btn-small" title="Edit">📝</button>
-              <button class="icon-btn-small" title="Delete">X</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      </section>
     </main>
-  </div> <div class="modal hidden" id="txModal" onclick="backdropClose(event,'txModal')">
+
+  <div class="modal hidden" id="txModal" onclick="backdropClose(event,'txModal')">
     <div class="modal-content" role="dialog" aria-modal="true">
       <div class="modal-top">
         <h3 id="txModalTitle">Add Transaction</h3>

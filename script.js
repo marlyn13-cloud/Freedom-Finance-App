@@ -315,6 +315,28 @@ window.saveTransaction = function () {
   renderAll();
 };
 
+// --- NEW: Populate the filter category dropdown ---
+function populateFilterCategories() {
+  const filterSel = document.getElementById("filterCategory");
+  if (!filterSel) return;
+  
+  const currentVal = filterSel.value; // Remember what the user had selected
+  
+  filterSel.innerHTML = '<option value="all">All categories</option>';
+  const cats = getAllCategoryOptions(); 
+  
+  cats.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.toLowerCase();
+    opt.textContent = c;
+    filterSel.appendChild(opt);
+  });
+  
+  if (currentVal && cats.map(c => c.toLowerCase()).includes(currentVal)) {
+    filterSel.value = currentVal; // Restore selection
+  }
+}
+
 window.deleteTransaction = function (id) {
   saveTx(loadTx().filter(t => t.id !== id));
   renderAll();
@@ -446,27 +468,67 @@ function renderAll() {
   }
 
   // Render All Transactions (Transaction Page)
+  // Render All Transactions (Transaction Page)
   const allWrap = document.getElementById("allList");
   if (allWrap) {
+    // 1. Get the current values from the search bar and dropdowns
+    const searchInput = document.getElementById("searchTx");
+    const typeSelect = document.getElementById("filterType");
+    const catSelect = document.getElementById("filterCategory");
+    
+    const searchVal = searchInput ? searchInput.value.toLowerCase() : "";
+    const typeVal = typeSelect ? typeSelect.value : "all";
+    const catVal = catSelect ? catSelect.value : "all";
+
+    // 2. Filter the transactions!
+    let filteredTxs = txs.slice().sort((a,b) => b.date.localeCompare(a.date));
+    
+    if (searchVal) {
+      filteredTxs = filteredTxs.filter(t => 
+        t.desc.toLowerCase().includes(searchVal) || 
+        t.category.toLowerCase().includes(searchVal)
+      );
+    }
+    if (typeVal !== "all") {
+      filteredTxs = filteredTxs.filter(t => t.type === typeVal);
+    }
+    if (catVal !== "all") {
+      filteredTxs = filteredTxs.filter(t => t.category.toLowerCase() === catVal);
+    }
+
+    // 3. Update the total transaction count at the top of the page
+    const txCountEl = document.getElementById("txCount");
+    if (txCountEl) {
+      txCountEl.textContent = `${filteredTxs.length} transaction${filteredTxs.length !== 1 ? 's' : ''}`;
+    }
+
+    // 4. Make sure the Category dropdown is up to date with any newly added categories
+    populateFilterCategories();
+
+    // 5. Draw the filtered list to the screen
     allWrap.innerHTML = "";
-    txs.slice().sort((a,b) => b.date.localeCompare(a.date)).forEach(t => {
-      const isOutflow = (t.type === "expense" || t.type === "savings" || t.type === "investment");
-      const row = document.createElement("div");
-      row.className = "tx-row";
-      row.innerHTML = `
-        <div class="col-desc">
-          <div class="tx-icon ${isOutflow ? 'bg-light-red' : 'bg-light-green'}">${isOutflow ? '🍔' : '💰'}</div>
-          <div class="tx-info"><div class="tx-title">${escapeHtml(t.desc)}</div><div class="tx-note">No notes</div></div>
-        </div>
-        <div class="col-cat"><span class="badge-pill">${escapeHtml(t.category)}</span></div>
-        <div class="col-date">${t.date}</div>
-        <div class="col-amt ${isOutflow ? 'text-red' : 'text-green'}">${isOutflow ? '-' : '+'}${money(Math.abs(t.amount))}</div>
-        <div class="col-actions">
-          <button class="icon-btn-small" onclick="window.openTxModalEdit('${t.id}')">📝</button>
-          <button class="icon-btn-small" onclick="window.deleteTransaction('${t.id}')">🗑️</button>
-        </div>`;
-      allWrap.appendChild(row);
-    });
+    if (filteredTxs.length === 0) {
+       allWrap.innerHTML = "<div class='text-muted' style='padding: 32px; text-align: center;'>No transactions found.</div>";
+    } else {
+      filteredTxs.forEach(t => {
+        const isOutflow = (t.type === "expense" || t.type === "savings" || t.type === "investment");
+        const row = document.createElement("div");
+        row.className = "tx-row";
+        row.innerHTML = `
+          <div class="col-desc">
+            <div class="tx-icon ${isOutflow ? 'bg-light-red' : 'bg-light-green'}">${isOutflow ? '🍔' : '💰'}</div>
+            <div class="tx-info"><div class="tx-title">${escapeHtml(t.desc)}</div><div class="tx-note">No notes</div></div>
+          </div>
+          <div class="col-cat"><span class="badge-pill">${escapeHtml(t.category)}</span></div>
+          <div class="col-date">${t.date}</div>
+          <div class="col-amt ${isOutflow ? 'text-red' : 'text-green'}">${isOutflow ? '-' : '+'}${money(Math.abs(t.amount))}</div>
+          <div class="col-actions">
+            <button class="icon-btn-small" onclick="window.openTxModalEdit('${t.id}')">📝</button>
+            <button class="icon-btn-small" onclick="window.deleteTransaction('${t.id}')">🗑️</button>
+          </div>`;
+        allWrap.appendChild(row);
+      });
+    }
   }
 
   // Render Dashboard Spending by Category
@@ -939,10 +1001,9 @@ function appendMessage(sender, text) {
   
   if (sender === "user") {
     div.style.cssText =
-      "background:var(--green);color:#fff;align-self:flex-end;" +
+      "background:var(--color-primary);color:#fff;align-self:flex-end;" +
       "border-bottom-left-radius:12px;border-bottom-right-radius:4px;margin-left:auto;";
   }
-  
   chatBody.appendChild(div);
   scrollToBottom();
   return div.id;

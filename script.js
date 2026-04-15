@@ -1,5 +1,9 @@
 // ===== 1. STORAGE KEYS & STATE =====
+<<<<<<< HEAD
 const TX_KEY = "ff_transactions_v1";
+=======
+const TX_KEY  = "ff_transactions_v1";
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
 const BUD_KEY = "ff_budgets_v1";
 const CAT_KEY = "ff_categories_v1";
 const USER_KEY = "ff_users_v1";
@@ -10,6 +14,7 @@ let editingBudId = null;
 let isRendering = false; // Safety lock against infinite loops
 
 // ===== 2. HELPERS =====
+<<<<<<< HEAD
 function uid() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
@@ -88,6 +93,39 @@ function showAuthView(name) {
   const signupView = document.getElementById("view-signup");
   if (loginView) loginView.classList.remove("active");
   if (signupView) signupView.classList.remove("active");
+=======
+function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
+function money(n){ return Number(n).toLocaleString(undefined, {style:"currency", currency:"USD"}); }
+function escapeHtml(str){ return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function isValidEmail(email){ return /\S+@\S+\.\S+/.test(email); }
+
+// --- Modal Logic ---
+function openModal(id){ const el = document.getElementById(id); if(el) { el.classList.remove("hidden"); el.style.display = "flex"; } }
+function closeModal(id){ const el = document.getElementById(id); if(el) { el.classList.add("hidden"); el.style.display = "none"; } }
+function backdropClose(e, id){ if(e.target.id === id) closeModal(id); }
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeModal("txModal"); closeModal("budgetModal"); } });
+
+// ===== 3. AUTHENTICATION =====
+function loadUsers(){ try { return JSON.parse(localStorage.getItem(USER_KEY)) || []; } catch { return []; } }
+function saveUsers(users){ localStorage.setItem(USER_KEY, JSON.stringify(users)); }
+function setCurrentUser(user){ localStorage.setItem(SESSION_KEY, JSON.stringify(user)); }
+function getCurrentUser(){ try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+function clearCurrentUser(){ localStorage.removeItem(SESSION_KEY); }
+
+function clearAuthMessages(){
+  ["loginError", "signupError"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.style.display = "none"; el.textContent = ""; }
+  });
+}
+function showAuthError(id, msg){ const el = document.getElementById(id); if(el){ el.style.display = "block"; el.textContent = msg; } }
+function showAuthView(name){
+  clearAuthMessages();
+  const loginView = document.getElementById("view-login");
+  const signupView = document.getElementById("view-signup");
+  if(loginView) loginView.classList.remove("active");
+  if(signupView) signupView.classList.remove("active");
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   const activeView = document.getElementById(`view-${name}`);
   if (activeView) activeView.classList.add("active");
 }
@@ -99,11 +137,19 @@ function handleSignup() {
   const password = document.getElementById("signupPassword")?.value || "";
   const confirmPassword = document.getElementById("signupConfirmPassword")?.value || "";
 
+<<<<<<< HEAD
   if (!username || !email || !isValidEmail(email) || password.length < 6 || password !== confirmPassword) {
     return showAuthError("signupError", "Please check your inputs and try again.");
   }
   const users = loadUsers();
   if (users.some(u => u.email.toLowerCase() === email)) return showAuthError("signupError", "Email already exists.");
+=======
+  if(!username || !email || !isValidEmail(email) || password.length < 6 || password !== confirmPassword) {
+    return showAuthError("signupError", "Please check your inputs and try again.");
+  }
+  const users = loadUsers();
+  if(users.some(u => u.email.toLowerCase() === email)) return showAuthError("signupError", "Email already exists.");
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   users.push({ id: uid(), username, email, password });
   saveUsers(users);
   document.getElementById("loginIdentifier").value = email;
@@ -115,12 +161,18 @@ function handleLogin() {
   const identifier = (document.getElementById("loginIdentifier")?.value || "").trim().toLowerCase();
   const password = document.getElementById("loginPassword")?.value || "";
   const user = loadUsers().find(u => u.email.toLowerCase() === identifier || u.username.toLowerCase() === identifier);
+<<<<<<< HEAD
 
   if (!user || user.password !== password) return showAuthError("loginError", "Invalid credentials.");
+=======
+  
+  if(!user || user.password !== password) return showAuthError("loginError", "Invalid credentials.");
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   setCurrentUser({ id: user.id, username: user.username, email: user.email });
   window.location.href = "dashboard.html";
 }
 
+<<<<<<< HEAD
 window.logoutUser = function () { 
   clearCurrentUser(); window.location.href = "index.html"; 
 }
@@ -155,6 +207,18 @@ function loadCategories() {
 function saveCategories(cats) { 
   localStorage.setItem(CAT_KEY, JSON.stringify(cats)); 
 }
+=======
+window.logoutUser = function() { clearCurrentUser(); window.location.href = "index.html"; }
+function requireAuth(){ if(!document.getElementById("authPage") && !getCurrentUser()) window.location.href = "index.html"; }
+
+// ===== 4. DATA LOGIC =====
+function loadTx()   { try { return JSON.parse(localStorage.getItem(TX_KEY)) || []; } catch { return []; } }
+function saveTx(txs){ localStorage.setItem(TX_KEY, JSON.stringify(txs)); }
+function loadBudgets() { try { const b = JSON.parse(localStorage.getItem(BUD_KEY)); if (Array.isArray(b)) return b; } catch { /**/ } const seed = []; saveBudgets(seed); return seed; }
+function saveBudgets(buds) { localStorage.setItem(BUD_KEY, JSON.stringify(buds)); }
+function loadCategories() { try { const c = JSON.parse(localStorage.getItem(CAT_KEY)); if (Array.isArray(c) && c.length) return c; } catch { /**/ } const defaults = ["Other", "Salary"]; saveCategories(defaults); return defaults; }
+function saveCategories(cats) { localStorage.setItem(CAT_KEY, JSON.stringify(cats)); }
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
 
 function expenseByCategory(txs) {
   const m = new Map();
@@ -178,12 +242,17 @@ function getAllCategoryOptions() {
 function computeTotals(txs) {
   let income = 0, expenses = 0, savings = 0, investment = 0;
   for (const t of txs) {
+<<<<<<< HEAD
     const amt = Math.abs(Number(t.amount || 0));
+=======
+    const amt = Math.abs(Number(t.amount || 0)); 
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
     if (t.type === "income") income += amt;
     else if (t.type === "expense") expenses += amt;
     else if (t.type === "savings") savings += amt;
     else if (t.type === "investment") investment += amt;
   }
+<<<<<<< HEAD
   return { 
     income, expenses, savings, investment, balance: income - expenses 
   };
@@ -200,15 +269,27 @@ function clearTxError() {
   const b = document.getElementById("txError"); 
   if (b) b.style.display = "none"; 
 }
+=======
+  return { income, expenses, savings, investment, balance: income - expenses };
+}
+
+// ===== 5. TRANSACTIONS UI =====
+function txError(msg) { const b = document.getElementById("txError"); if (b) { b.style.display = "block"; b.textContent = msg; } }
+function clearTxError() { const b = document.getElementById("txError"); if (b) b.style.display = "none"; }
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
 
 function populateTxCategoryDropdown(selected) {
   const sel = document.getElementById("txCategory");
   if (!sel) return;
   const cats = getAllCategoryOptions();
   sel.innerHTML = "";
+<<<<<<< HEAD
   cats.forEach(c => { 
     const opt = document.createElement("option"); opt.value = c; opt.textContent = c; sel.appendChild(opt);
    });
+=======
+  cats.forEach(c => { const opt = document.createElement("option"); opt.value = c; opt.textContent = c; sel.appendChild(opt); });
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   const optNew = document.createElement("option"); optNew.value = "__new__"; optNew.textContent = "+ New category..."; sel.appendChild(optNew);
   sel.value = (selected && cats.includes(selected)) ? selected : (cats[0] || "Other");
   window.onTxCategoryChange();
@@ -267,12 +348,17 @@ window.saveTransaction = function () {
 
   if (editingTxId) {
     const idx = txs.findIndex(x => x.id === editingTxId);
+<<<<<<< HEAD
     if (idx >= 0) txs[idx] = { 
       id: editingTxId, type, date, desc, amount: storedAmount, category 
     };
   } else { 
     txs.push({ id: uid(), type, date, desc, amount: storedAmount, category });
    }
+=======
+    if (idx >= 0) txs[idx] = { id: editingTxId, type, date, desc, amount: storedAmount, category };
+  } else { txs.push({ id: uid(), type, date, desc, amount: storedAmount, category }); }
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
 
   saveTx(txs);
   closeModal("txModal");
@@ -287,12 +373,17 @@ function populateFilterCategories() {
   const filterSel = document.getElementById("filterCategory"); if (!filterSel) return;
   const currentVal = filterSel.value;
   filterSel.innerHTML = '<option value="all">All categories</option>';
+<<<<<<< HEAD
   const cats = getAllCategoryOptions();
+=======
+  const cats = getAllCategoryOptions(); 
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   cats.forEach(c => { const opt = document.createElement("option"); opt.value = c.toLowerCase(); opt.textContent = c; filterSel.appendChild(opt); });
   if (currentVal && cats.map(c => c.toLowerCase()).includes(currentVal)) filterSel.value = currentVal;
 }
 
 // ===== 6. BUDGETS UI =====
+<<<<<<< HEAD
 function budError(msg) { 
   const b = document.getElementById("budError"); 
   if (b) { b.style.display = "block"; b.textContent = msg; 
@@ -301,6 +392,10 @@ function budError(msg) {
 function clearBudError() { 
   const b = document.getElementById("budError"); if (b) b.style.display = "none"; 
 }
+=======
+function budError(msg) { const b = document.getElementById("budError"); if (b) { b.style.display = "block"; b.textContent = msg; } }
+function clearBudError() { const b = document.getElementById("budError"); if (b) b.style.display = "none"; }
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
 
 window.openBudgetModalAdd = function () {
   editingBudId = null; clearBudError();
@@ -343,7 +438,11 @@ window.saveBudget = function () {
 window.deleteBudget = function (id) { saveBudgets(loadBudgets().filter(b => b.id !== id)); renderAll(); };
 
 // ===== 7. RENDER ENGINE =====
+<<<<<<< HEAD
 window.renderAll = function () {
+=======
+window.renderAll = function() {
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   if (isRendering) return;
   isRendering = true;
 
@@ -351,11 +450,19 @@ window.renderAll = function () {
     const txs = loadTx();
     const buds = loadBudgets();
     const { income, expenses, savings, balance } = computeTotals(txs);
+<<<<<<< HEAD
 
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     set("sum-income", money(income)); set("sum-expenses", money(expenses)); set("sum-savings", money(savings));
     set("sum-balance", money(balance)); set("side-balance", money(balance));
 
+=======
+    
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set("sum-income", money(income)); set("sum-expenses", money(expenses)); set("sum-savings", money(savings)); 
+    set("sum-balance", money(balance)); set("side-balance", money(balance));
+
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
     const sidePctEl = document.getElementById("side-savings-pct");
     if (sidePctEl) sidePctEl.textContent = `${income > 0 ? Math.round((balance / income) * 100) : 0}% of income saved`;
 
@@ -366,7 +473,11 @@ window.renderAll = function () {
     const recentWrap = document.getElementById("recentList");
     if (recentWrap) {
       recentWrap.innerHTML = "";
+<<<<<<< HEAD
       txs.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).forEach(t => {
+=======
+      txs.slice().sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5).forEach(t => {
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
         const isOutflow = (t.type === "expense" || t.type === "savings" || t.type === "investment");
         const row = document.createElement("div"); row.className = "tx-item";
         row.innerHTML = `<div class="tx-icon ${isOutflow ? 'bg-light-red' : 'bg-light-green'}">${isOutflow ? '🍔' : '💰'}</div>
@@ -388,7 +499,11 @@ window.renderAll = function () {
       const typeVal = typeSelect ? typeSelect.value : "all";
       const catVal = catSelect ? catSelect.value : "all";
 
+<<<<<<< HEAD
       let filteredTxs = txs.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+=======
+      let filteredTxs = txs.slice().sort((a,b) => (b.date || "").localeCompare(a.date || ""));
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
       if (searchVal) filteredTxs = filteredTxs.filter(t => (t.desc || "").toLowerCase().includes(searchVal) || (t.category || "").toLowerCase().includes(searchVal));
       if (typeVal !== "all") filteredTxs = filteredTxs.filter(t => t.type === typeVal);
       if (catVal !== "all") filteredTxs = filteredTxs.filter(t => (t.category || "").toLowerCase() === catVal);
@@ -415,11 +530,19 @@ window.renderAll = function () {
 
     // 7C. Budget Categories Dashboard
     const dashCatList = document.querySelector(".category-list");
+<<<<<<< HEAD
     if (dashCatList && !document.getElementById("reportsChartWrap")) {
       const spentMap = expenseByCategory(txs);
       const sortedCats = Array.from(spentMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
       dashCatList.innerHTML = "";
       if (sortedCats.length === 0) dashCatList.innerHTML = "<div class='text-muted' style='padding: 16px 0;'>No expenses logged yet.</div>";
+=======
+    if (dashCatList && !document.getElementById("reportsChartWrap")) { 
+      const spentMap = expenseByCategory(txs);
+      const sortedCats = Array.from(spentMap.entries()).sort((a,b) => b[1] - a[1]).slice(0, 3);
+      dashCatList.innerHTML = ""; 
+      if(sortedCats.length === 0) dashCatList.innerHTML = "<div class='text-muted' style='padding: 16px 0;'>No expenses logged yet.</div>";
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
       else {
         sortedCats.forEach((item, index) => {
           const [cat, amt] = item; const pct = Math.round((amt / (expenses || 1)) * 100);
@@ -438,16 +561,26 @@ window.renderAll = function () {
       budContainer.innerHTML = "";
       buds.forEach(b => {
         let spent = 0; for (const [tCat, amt] of spentMap.entries()) { if (tCat.toLowerCase() === b.category.toLowerCase()) spent += amt; }
+<<<<<<< HEAD
         const pct = b.limit > 0 ? Math.min(100, Math.round((spent / b.limit) * 100)) : 0;
         const isOver = spent > b.limit; const isNear = !isOver && pct >= 90;
 
+=======
+        const pct = b.limit > 0 ? Math.min(100, Math.round((spent/b.limit)*100)) : 0;
+        const isOver = spent > b.limit; const isNear = !isOver && pct >= 90; 
+        
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
         const card = document.createElement("div"); card.className = "budget-card";
         card.innerHTML = `<div class="bc-header"><div class="bc-title-group"><span>📊</span><span>${escapeHtml(b.category)}</span></div>
           <div class="bc-actions"><span class="tx-badge ${isOver ? 'badge-red' : (isNear ? 'badge-warning' : 'badge-green')}">${isOver ? 'Over budget' : (isNear ? 'Nearing limit' : 'On track')}</span>
           <button class="btn-close" onclick="window.deleteBudget('${b.id}')">✕</button></div></div>
           <div class="bc-sub">Monthly budget</div><div class="bc-amounts"><span class="bc-spent ${isOver ? 'text-red' : (isNear ? 'text-orange' : 'text-dark')}">${money(spent)}</span><span class="bc-limit">of ${money(b.limit)}</span></div>
           <div class="bc-progress"><div class="progress-fill ${isOver ? 'fill-red' : (isNear ? 'fill-orange' : 'fill-blue')}" style="width: ${pct}%"></div></div>
+<<<<<<< HEAD
           <div class="bc-footer"><span>${isOver ? money(spent - b.limit) + ' over' : money(b.limit - spent) + ' remaining'}</span><span>${pct}%</span></div>`;
+=======
+          <div class="bc-footer"><span>${isOver ? money(spent-b.limit) + ' over' : money(b.limit-spent) + ' remaining'}</span><span>${pct}%</span></div>`;
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
         budContainer.appendChild(card);
       });
     }
@@ -467,9 +600,15 @@ window.renderAll = function () {
           legendHtml += `<div class="legend-item"><div class="legend-left"><div class="legend-color" style="background:${color}"></div><div class="legend-label">${escapeHtml(cat)}</div></div><div class="legend-val">${money(val)}</div></div>`;
         });
         reportsChartWrap.innerHTML = `<div class="pie-container"><div class="pie-chart" style="background:conic-gradient(${stops.join(",")})"></div><div class="pie-legend">${legendHtml}</div></div>`;
+<<<<<<< HEAD
 
         const catListEl = document.getElementById("categoryTotalsList");
         if (catListEl) {
+=======
+        
+        const catListEl = document.getElementById("categoryTotalsList");
+        if(catListEl) {
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
           catListEl.innerHTML = "";
           rows.forEach((item, index) => {
             const [cat, amt] = item; const pct = Math.round((amt / total) * 100); const colorClass = ["red", "blue", "orange", "green", "blue"][index % 5];
@@ -484,7 +623,11 @@ window.renderAll = function () {
 };
 
 // ===== 8. EXPORTS =====
+<<<<<<< HEAD
 window.exportToPDF = function () {
+=======
+window.exportToPDF = function() {
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821
   const txs = loadTx(); if (txs.length === 0) return alert("No transactions to export!");
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
   doc.setFontSize(18); doc.text("Freedom Finance Report", 14, 20); doc.setFontSize(11); doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 28);
@@ -559,5 +702,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const typeSelect = document.getElementById("filterType"); if (typeSelect) typeSelect.addEventListener("change", renderAll);
   const catSelect = document.getElementById("filterCategory"); if (catSelect) catSelect.addEventListener("change", renderAll);
+<<<<<<< HEAD
   const sparkInput = document.getElementById("spark-input"); if (sparkInput) sparkInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); window.handleSparkSend(); } });
 });
+=======
+  const sparkInput = document.getElementById("spark-input"); if (sparkInput) sparkInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); window.handleSparkSend(); }});
+});
+>>>>>>> 9b6d93a48d35780e07ad8a8aedfbce3bf2d6c821

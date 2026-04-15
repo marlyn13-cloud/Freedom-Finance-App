@@ -537,7 +537,7 @@ async function generateAIResponse(userMessage) {
   const txs = loadTx();
   const buds = loadBudgets();
   const totals = computeTotals(txs);
-  const msg = userMessage.toLowerCase();
+  const msg = userMessage.toLowerCase().trim();
 
   // 2. Pre-calculate complex insights for the AI
   const expensesOnly = txs.filter(t => t.type === "expense");
@@ -548,55 +548,80 @@ async function generateAIResponse(userMessage) {
 
   let overBudgets = [];
   buds.forEach(b => {
-    let spent = spentMap.get(b.category) || 0;
+    // Calculate spent safely by ignoring uppercase/lowercase differences
+    let spent = 0;
+    for (const [tCat, amt] of spentMap.entries()) {
+      if (tCat.toLowerCase() === b.category.toLowerCase()) spent += amt;
+    }
+    
     if (spent > b.limit) overBudgets.push(`${b.category} (${money(spent - b.limit)} over)`);
   });
 
-  // 3. Algorithmic Fast-Paths for core data questions 
-  if (msg.includes("most expensive") || msg.includes("highest expense") || msg.includes("biggest")) {
+  // 3. Algorithmic Fast-Paths 
+  if (msg.includes("most expensive") || msg.includes("highest") || msg.includes("biggest") || msg.includes("largest")) {
     if (!highestExpense) return "You haven't logged any expenses yet!";
-    return `Your most expensive single transaction was ${highestExpense.desc} for ${money(highestExpense.amount)} on ${highestExpense.date}.`;
+    return `Your most expensive transaction was ${highestExpense.desc} for ${money(highestExpense.amount)}.`;
   }
 
-  if (msg.includes("cut my budget") || msg.includes("reduce spending") || msg.includes("over budget")) {
+  if (msg.includes("cut") || msg.includes("reduce") || msg.includes("save") || msg.includes("over budget")) {
     if (overBudgets.length > 0) {
-      return `You are currently over budget in: ${overBudgets.join(', ')}. Trimming back in these areas is the best place to start.`;
+      return `You are currently over budget in: ${overBudgets.join(', ')}. Trimming back here is the best place to start.`;
     } else if (topCategory) {
-      return `You are staying within your limits, but your highest spending category is ${topCategory[0]} at ${money(topCategory[1])}. You could look for cuts there.`;
+      return `You are staying within your limits, but your highest spending category is ${topCategory[0]} at ${money(topCategory[1])}. Look for cuts there.`;
     }
     return "Your budget looks incredibly lean right now. Great job!";
   }
 
-  // fallbacks for the most common exact figures
+  // Fast-path for specific category budgets
+  if (msg.includes("budget for") || msg.includes("limit for")) {
+    const targetStr = msg.substring(msg.indexOf("for") + 3).trim().replace("?", "");
+    const matchedBudget = buds.find(b => targetStr.includes(b.category.toLowerCase()) || b.category.toLowerCase().includes(targetStr));
+    
+    if (matchedBudget) {
+        let spent = 0;
+        for (const [tCat, amt] of spentMap.entries()) {
+            if (tCat.toLowerCase() === matchedBudget.category.toLowerCase()) spent += amt;
+        }
+        return `Your budget for ${matchedBudget.category} is ${money(matchedBudget.limit)}. (You've spent ${money(spent)} so far).`;
+    } else {
+        return `I couldn't find a specific budget limit set for that category.`;
+    }
+  }
+
   if (msg.includes("balance")) return `Your current balance is ${money(totals.balance)}.`;
   if (msg.includes("income") || msg.includes("make") || msg.includes("earn")) return `Your total income is ${money(totals.income)}.`;
-  if (msg.includes("total expense") || msg.includes("spent")) return `Your total expenses are ${money(totals.expenses)}.`;
+  if (msg.includes("total expense") || msg.includes("spent") || msg.includes("spending")) return `Your total expenses are ${money(totals.expenses)}.`;
 
-  // 4. LLM Fallback for general/unpredictable queries
+  // 4. LLM Fallback with strict ChatML Formatting
   try {
-    // Inject the FULL financial picture so the AI doesn't have to guess
-    const prompt = `System: You are Spark AI, a helpful financial assistant. Answer in exactly one short sentence. Do not explain your steps.
-Current Financial Data:
-- Total Income: ${money(totals.income)}
-- Total Expenses: ${money(totals.expenses)}
-- Current Balance: ${money(totals.balance)}
-- Highest Expense: ${highestExpense ? highestExpense.desc : 'none'}
+    // Stringify budgets for the AI's context so it isn't blind
+    const budgetList = buds.map(b => `${b.category}:${money(b.limit)}`).join(", ");
 
-User: ${userMessage}
-Spark AI:`;
+    const prompt = `<|im_start|>system\nYou are Spark AI, a helpful financial assistant. Answer in exactly one short sentence.\nData: Income=${money(totals.income)}, Expenses=${money(totals.expenses)}, Balance=${money(totals.balance)}, Budgets=[${budgetList}].<|im_end|>\n<|im_start|>user\n${userMessage}<|im_end|>\n<|im_start|>assistant\n`;
 
     const result = await aiPipeline(prompt, { 
       max_new_tokens: 30, 
       do_sample: false,
-      temperature: 0.1 // Forces the model to be strict and factual.
+      temperature: 0.1,
+      return_full_text: false // Stops the model from returning our system prompt back to us
     });
 
-    // 5.  Cleanup of Local LLM Output
-    let reply = result[0].generated_text.split("Spark AI:").pop().trim();
+    // Parse out the newly generated text safely
+    let reply = result[0].generated_text;
     
-    // This forces the output to stop at the very first line break.
-    reply = reply.split("\n")[0]; 
-    reply = reply.replace(/\*\*.*$/, "").trim(); 
+    // Hard strip any leaked ChatML tags just in case
+    reply = reply.replace(/<\|im_start\|>/g, "")
+                 .replace(/<\|im_end\|>/g, "")
+                 .replace(/assistant/gi, "")
+                 .replace(/system/gi, "") 
+                 .trim();
+                 
+    reply = reply.split("\n")[0].replace(/\*\*.*$/, "").trim();
+
+    // Anti-Echo Check
+    if (reply.toLowerCase().includes(msg.substring(0, 10)) && reply.length < msg.length + 10) {
+        return "I'm still learning! Could you rephrase that as a question about your budget or expenses?";
+    }
     
     return reply || "I'm not quite sure how to help with that yet. Try asking about your expenses or income!";
     

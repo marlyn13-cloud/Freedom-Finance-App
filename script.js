@@ -531,10 +531,79 @@ async function initializeSparkAI() {
 }
 
 async function generateAIResponse(userMessage) {
-  if (!isAiReady) return "Still waking up!";
-  const txs = loadTx(); const totals = computeTotals(txs);
-  if (userMessage.includes("balance")) return `Balance: ${money(totals.balance)}`;
-  return "I couldn't find a match. Try searching for an expense!";
+  if (!isAiReady) return "Still waking up! Give me just a second.";
+
+  // 1. Gather all current financial state
+  const txs = loadTx();
+  const buds = loadBudgets();
+  const totals = computeTotals(txs);
+  const msg = userMessage.toLowerCase();
+
+  // 2. Pre-calculate complex insights for the AI
+  const expensesOnly = txs.filter(t => t.type === "expense");
+  const highestExpense = expensesOnly.sort((a, b) => b.amount - a.amount)[0];
+  
+  const spentMap = expenseByCategory(txs);
+  const topCategory = Array.from(spentMap.entries()).sort((a, b) => b[1] - a[1])[0];
+
+  let overBudgets = [];
+  buds.forEach(b => {
+    let spent = spentMap.get(b.category) || 0;
+    if (spent > b.limit) overBudgets.push(`${b.category} (${money(spent - b.limit)} over)`);
+  });
+
+  // 3. Algorithmic Fast-Paths for core data questions 
+  if (msg.includes("most expensive") || msg.includes("highest expense") || msg.includes("biggest")) {
+    if (!highestExpense) return "You haven't logged any expenses yet!";
+    return `Your most expensive single transaction was ${highestExpense.desc} for ${money(highestExpense.amount)} on ${highestExpense.date}.`;
+  }
+
+  if (msg.includes("cut my budget") || msg.includes("reduce spending") || msg.includes("over budget")) {
+    if (overBudgets.length > 0) {
+      return `You are currently over budget in: ${overBudgets.join(', ')}. Trimming back in these areas is the best place to start.`;
+    } else if (topCategory) {
+      return `You are staying within your limits, but your highest spending category is ${topCategory[0]} at ${money(topCategory[1])}. You could look for cuts there.`;
+    }
+    return "Your budget looks incredibly lean right now. Great job!";
+  }
+
+  // fallbacks for the most common exact figures
+  if (msg.includes("balance")) return `Your current balance is ${money(totals.balance)}.`;
+  if (msg.includes("income") || msg.includes("make") || msg.includes("earn")) return `Your total income is ${money(totals.income)}.`;
+  if (msg.includes("total expense") || msg.includes("spent")) return `Your total expenses are ${money(totals.expenses)}.`;
+
+  // 4. LLM Fallback for general/unpredictable queries
+  try {
+    // Inject the FULL financial picture so the AI doesn't have to guess
+    const prompt = `System: You are Spark AI, a helpful financial assistant. Answer in exactly one short sentence. Do not explain your steps.
+Current Financial Data:
+- Total Income: ${money(totals.income)}
+- Total Expenses: ${money(totals.expenses)}
+- Current Balance: ${money(totals.balance)}
+- Highest Expense: ${highestExpense ? highestExpense.desc : 'none'}
+
+User: ${userMessage}
+Spark AI:`;
+
+    const result = await aiPipeline(prompt, { 
+      max_new_tokens: 30, 
+      do_sample: false,
+      temperature: 0.1 // Forces the model to be strict and factual.
+    });
+
+    // 5.  Cleanup of Local LLM Output
+    let reply = result[0].generated_text.split("Spark AI:").pop().trim();
+    
+    // This forces the output to stop at the very first line break.
+    reply = reply.split("\n")[0]; 
+    reply = reply.replace(/\*\*.*$/, "").trim(); 
+    
+    return reply || "I'm not quite sure how to help with that yet. Try asking about your expenses or income!";
+    
+  } catch (err) {
+    console.error("LLM Generation Error:", err);
+    return "I couldn't process that right now. Try asking about your balance or highest expense!";
+  }
 }
 
 function appendMessage(sender, text) {
